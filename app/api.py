@@ -7,7 +7,7 @@ from bson.objectid import ObjectId
 
 
 # Get all competition infos
-@app.route("/api/all-competitions", methods=['GET'])
+@app.route("/api/competition/all-competitions", methods=['GET'])
 def get_all_competitions():
     data = list()
     for record in mongo.db.Competition.find():
@@ -49,6 +49,28 @@ def get_competition_by_comp_host_name(hostname):
     return jsonify(data)
 
 
+# Get competitions by its scenario
+@app.route("/api/competition/scenario/<string:scenario>", methods=['GET'])
+def get_competition_by_comp_scenario(scenario):
+    data = list()
+    # maybe the comp_scenario in different items are same
+    for record in mongo.db.Competition.find({"comp_scenario": scenario}):
+        record['_id'] = str(record['_id'])
+        data.append(record)
+    return jsonify(data)
+
+
+# Get competitions by its data feature
+@app.route("/api/competition/data-feature/<string:data_feature>", methods=['GET'])
+def get_competition_by_data_feature(data_feature):
+    data = list()
+    # maybe the data_feature in different items are same
+    for record in mongo.db.Competition.find({"data_feature": data_feature}):
+        record['_id'] = str(record['_id'])
+        data.append(record)
+    return jsonify(data)
+
+
 # Get one competition info by its _id
 @app.route("/api/competition/rid/<string:rid>", methods=['GET'])
 def get_competition_by__id(rid):
@@ -67,8 +89,8 @@ def get_competition_by__id(rid):
 def insert_new_competition():
     # assemble a dict
     new_competition = dict()
-    new_competition['comp_title'] = str(request.form.get('comp_title'))
-    new_competition['comp_subtitle'] = str(request.form.get('comp_subtitle'))
+    new_competition['comp_title'] = request.form.get('comp_title')
+    new_competition['comp_subtitle'] = request.form.get('comp_subtitle')
     new_competition['comp_range'] = request.form.get('comp_range')
     new_competition['comp_url'] = request.form.get('comp_url')
     new_competition['comp_description'] = request.form.get('comp_description')
@@ -92,129 +114,107 @@ def insert_new_competition():
     return get_competition_by__id(rid=rid)
 
 
-# # get account by account_id
-# @app.route('/api/account-id/<int:account_id>', methods=['GET'])
-# def get_user_by_uid(account_id):
-#     data = list()
-#     data.append(Account.query.get_or_404(account_id).to_dict())
-#     return jsonify(data)
+# Mention that all items are list type in this way
+# # Insert new competition infos
+# @app.route("/api/competition", methods=['POST'])
+# def insert_new_competition():
+#     # Here are the right way to write NoSQL receiver
+#     new_competition = dict(request.form)
 #
+#     oid = mongo.db.Competition.insert_one(new_competition).inserted_id
+#     rid = str(oid)
 #
-# # get account by account_email
-# @app.route('/api/account-email/<string:account_email>', methods=['GET'])
-# def get_user_by_username(account_email):
-#     data = list()
-#     data.append(Account.query.filter(Account.account_email == account_email).first_or_404().to_dict())
-#     return jsonify(data)
-#
-#
-# # get account by account_status
-# @app.route('/api/account-status/<string:account_status>', methods=['GET'])
-# def get_user_by_phone_number(account_status):
-#     data = list()
-#     for account in Account.query.filter(Account.account_status == account_status).all():
-#         data.append(account.to_dict())
-#     return jsonify(data)
-#
-#
-# # get all accounts
-# @app.route('/api/all-accounts', methods=['GET'])
-# def get_all_users():
-#     data = list()
-#     for account in Account.query.all():
-#         data.append(account.to_dict())
-#     return jsonify(data)
-#
-#
-# # create new account
-# @app.route('/api/create-account', methods=['POST'])
-# def create_new_user():
-#     account_email = request.form.get('account_email')
-#     password = request.form.get('password')
-#     email = request.form.get('email')
-#     phone_number = request.form.get('phone_number')
-#
-#     # check faults
-#     if password is None or username is None:
-#         return bad_request('This post must include both username and password fields.')
-#     if email is None or phone_number is None:
-#         return bad_request('This post must include both email and phone_number fields.')
-#     if User.query.filter_by(username=username).first():
-#         return bad_request('please use a different username.')
-#     if User.query.filter_by(email=email).first():
-#         return bad_request('please use a different email address.')
-#     if User.query.filter_by(phone_number=phone_number).first():
-#         return bad_request('please use a different phone number.')
-#
-#     # db operations
-#     new_user = User(username=username, email=email, phone_number=phone_number)
-#     new_user.set_password(password)
-#     db.session.add(new_user)
-#     db.session.commit()
-#
-#     # response data
-#     data = list()
-#     # This username is the one which user input in POST form
-#     data.append(User.query.filter(User.username == username).first_or_404().to_dict())
-#
-#     return jsonify(data)
-#
-#
-# # update user info
-# @app.route('/users', methods=['PUT'])
-# def update_user():
-#     username = request.form.get('username')
-#     if username is None:
-#         return bad_request('This post must include username field.')
-#
-#     # get PUT data
-#     password = request.form.get('password') or None
-#     email = request.form.get('email') or None
-#     phone_number = request.form.get('phone_number') or None
-#
-#     # take out data form db
-#     user = User.query.filter_by(username=username).first()
-#
-#     # update procedure
-#     if password is not None:
-#         user.set_password(password)
-#     if email is not None:
-#         user.email = email
-#     if phone_number is not None:
-#         user.phone_number = phone_number
-#
-#     # update db
-#     db.session.add(user)
-#     db.session.commit()
-#
-#     # response data
-#     data = list()
-#     # This username is the one which user input in POST form
-#     data.append(User.query.filter(User.username == username).first_or_404().to_dict())
-#
-#     return jsonify(data)
-#
-#
-# # verify username and password
-# @app.route('/users/validation/', methods=['POST'])
-# def validate_password():
-#     # Get user information from POST
-#     username = request.form.get('username')
-#     password = request.form.get('password')
-#
-#     # if there is no password field in post
-#     if password is None or username is None:
-#         return bad_request('This post must include both username and password fields.')
-#     user = User.query.filter(User.username == username).first()
-#     if user is None:
-#         return jsonify([{'uid': -1, 'username': username, 'validation': 'False'}])
-#     validate = user.check_password(password)
-#
-#     # authentication verify success.
-#     if validate is True:
-#         return jsonify([{'uid': user.id, 'username': username, 'validation': 'True'}])
-#     # authentication verify failed.
-#     return jsonify([{'uid': -1, 'username': username, 'validation': 'False'}])
+#     # return redirect(url_for('get_competition_by__id', rid=rid))
+#     # return the success info
+#     return get_competition_by__id(rid=rid)
+
+
+# Modify an existed competition info
+@app.route("/api/competition/<string:rid>", methods=['PUT'])
+def update_competition(rid):
+    # assemble a dict
+    mod_competition = dict()
+    mod_competition['comp_title'] = request.form.get('comp_title')
+    mod_competition['comp_subtitle'] = request.form.get('comp_subtitle')
+    mod_competition['comp_range'] = request.form.get('comp_range')
+    mod_competition['comp_url'] = request.form.get('comp_url')
+    mod_competition['comp_description'] = request.form.get('comp_description')
+    mod_competition['comp_host_name'] = request.form.get('comp_host_name')
+    mod_competition['comp_host_url'] = request.form.get('comp_host_url')
+    mod_competition['prize_amount'] = request.form.get('prize_amount')
+    mod_competition['prize_currency'] = request.form.get('prize_currency')
+    mod_competition['publish_time'] = request.form.get('publish_time')
+    mod_competition['update_time'] = request.form.get('update_time')
+    mod_competition['deadline'] = request.form.get('deadline')
+    mod_competition['timezone'] = request.form.get('timezone')
+    mod_competition['comp_scenario'] = request.form.get('comp_scenario')
+    mod_competition['data_feature'] = request.form.get('data_feature')
+    mod_competition['contributor_id'] = request.form.get('contributor_id')
+
+    # pymongo update dict structure
+    set_dict = {"$set": mod_competition}
+
+    oid = ObjectId(rid)
+    mongo.db.Competition.update_one({"_id": oid}, set_dict)
+
+    # return redirect(url_for('get_competition_by__id', rid=rid))
+    # return the success info
+    return get_competition_by__id(rid=rid)
+
+
+# Delete an existed competition info
+@app.route("/api/competition/<string:rid>", methods=['DELETE'])
+def delete_competition(rid):
+    set_dict = dict()
+    oid = ObjectId(rid)
+    set_dict['_id'] = oid
+    mongo.db.Competition.delete_one(set_dict)
+    data = [{'_id': rid, 'deleted status': 'success'}]
+    return jsonify(data)
+
+
+# Get competitions info by its name in fuzzy mode
+@app.route("/api/competition/competition-name/fuzzy/<string:competition_name>", methods=['GET'])
+def get_competition_by_comp_name_fuzzy(competition_name):
+    data = list()
+    # using fuzzy mode with regex
+    for record in mongo.db.Competition.find({"comp_title": {'$regex': competition_name}}):
+        record['_id'] = str(record['_id'])
+        data.append(record)
+    return jsonify(data)
+
+
+# Get competitions by its hostname in fuzzy mode
+@app.route("/api/competition/hostname/fuzzy/<string:hostname>", methods=['GET'])
+def get_competition_by_comp_host_name_fuzzy(hostname):
+    data = list()
+    # maybe the hostname in different items are same
+    for record in mongo.db.Competition.find({"comp_host_name": {'$regex': hostname}}):
+        record['_id'] = str(record['_id'])
+        data.append(record)
+    return jsonify(data)
+
+
+# Get competitions by its scenario in fuzzy mode
+@app.route("/api/competition/scenario/fuzzy/<string:scenario>", methods=['GET'])
+def get_competition_by_comp_scenario_fuzzy(scenario):
+    data = list()
+    # maybe the comp_scenario in different items are same
+    for record in mongo.db.Competition.find({"comp_scenario": {'$regex': scenario}}):
+        record['_id'] = str(record['_id'])
+        data.append(record)
+    return jsonify(data)
+
+
+# Get competitions by its data feature in fuzzy mode
+@app.route("/api/competition/data-feature/fuzzy/<string:data_feature>", methods=['GET'])
+def get_competition_by_data_feature_fuzzy(data_feature):
+    data = list()
+    # maybe the data_feature in different items are same
+    for record in mongo.db.Competition.find({"data_feature": {'$regex': data_feature}}):
+        record['_id'] = str(record['_id'])
+        data.append(record)
+    return jsonify(data)
 
 
 # bad requests holder
