@@ -7,7 +7,7 @@ from bson.objectid import ObjectId
 
 
 # Get all competition infos
-@app.route("/api/all-competitions")
+@app.route("/api/all-competitions", methods=['GET'])
 def get_all_competitions():
     data = list()
     for record in mongo.db.Competition.find():
@@ -16,20 +16,42 @@ def get_all_competitions():
     return jsonify(data)
 
 
-# Get one competition info by its name
-@app.route("/api/competition/competition_name/<string:competition_name>")
-def get_competition_by_competition_name(competition_name):
+# Get competitions info by its name
+@app.route("/api/competition/competition-name/<string:competition_name>", methods=['GET'])
+def get_competition_by_comp_name(competition_name):
     data = list()
     # maybe the competition_name in different items are same
-    for record in mongo.db.Competition.find({"competition_name": competition_name}):
+    for record in mongo.db.Competition.find({"comp_title": competition_name}):
+        record['_id'] = str(record['_id'])
+        data.append(record)
+    return jsonify(data)
+
+
+# Get competitions by its owner(contributor_id)
+@app.route("/api/competition/contributor-id/<string:contributor_id>", methods=['GET'])
+def get_competition_by_contributor_id(contributor_id):
+    data = list()
+    # maybe the contributor_id in different items are same
+    for record in mongo.db.Competition.find({"contributor_id": contributor_id}):
+        record['_id'] = str(record['_id'])
+        data.append(record)
+    return jsonify(data)
+
+
+# Get competitions by its hostname
+@app.route("/api/competition/hostname/<string:hostname>", methods=['GET'])
+def get_competition_by_comp_host_name(hostname):
+    data = list()
+    # maybe the hostname in different items are same
+    for record in mongo.db.Competition.find({"comp_host_name": hostname}):
         record['_id'] = str(record['_id'])
         data.append(record)
     return jsonify(data)
 
 
 # Get one competition info by its _id
-@app.route("/api/competition/rid/<string:rid>")
-def get_competition_by_id(rid):
+@app.route("/api/competition/rid/<string:rid>", methods=['GET'])
+def get_competition_by__id(rid):
     data = list()
     # Type 'ObjectId' in Pymongo come from bson.objectid.ObjectId
     oid = ObjectId(rid)
@@ -38,6 +60,37 @@ def get_competition_by_id(rid):
     record['_id'] = str(record['_id'])
     data.append(record)
     return jsonify(data)
+
+
+# Insert new competition infos
+@app.route("/api/competition", methods=['POST'])
+def insert_new_competition():
+    # assemble a dict
+    new_competition = dict()
+    new_competition['comp_title'] = str(request.form.get('comp_title'))
+    new_competition['comp_subtitle'] = str(request.form.get('comp_subtitle'))
+    new_competition['comp_range'] = request.form.get('comp_range')
+    new_competition['comp_url'] = request.form.get('comp_url')
+    new_competition['comp_description'] = request.form.get('comp_description')
+    new_competition['comp_host_name'] = request.form.get('comp_host_name')
+    new_competition['comp_host_url'] = request.form.get('comp_host_url')
+    new_competition['prize_amount'] = request.form.get('prize_amount')
+    new_competition['prize_currency'] = request.form.get('prize_currency')
+    new_competition['publish_time'] = request.form.get('publish_time')
+    new_competition['update_time'] = request.form.get('update_time')
+    new_competition['deadline'] = request.form.get('deadline')
+    new_competition['timezone'] = request.form.get('timezone')
+    new_competition['comp_scenario'] = request.form.get('comp_scenario')
+    new_competition['data_feature'] = request.form.get('data_feature')
+    new_competition['contributor_id'] = request.form.get('contributor_id')
+
+    oid = mongo.db.Competition.insert_one(new_competition).inserted_id
+    rid = str(oid)
+
+    # return redirect(url_for('get_competition_by__id', rid=rid))
+    # return the success info
+    return get_competition_by__id(rid=rid)
+
 
 # # get account by account_id
 # @app.route('/api/account-id/<int:account_id>', methods=['GET'])
