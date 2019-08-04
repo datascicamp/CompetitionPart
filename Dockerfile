@@ -13,8 +13,9 @@ RUN pip install psycopg2-binary
 RUN pip install flask-sqlalchemy
 RUN pip install flask-migrate
 RUN pip install python-dotenv
+RUN pip install flask_pymongo
 # Expose port
-EXPOSE 80
+EXPOSE 5000
 # Run command
 ENTRYPOINT ["python","./webServer.py"]
 
