@@ -10,10 +10,8 @@ Add . /var/app/webServerDir
 RUN pip install Flask
 RUN pip install Flask-wtf
 RUN pip install psycopg2-binary
-RUN pip install flask-sqlalchemy
-RUN pip install flask-migrate
-RUN pip install python-dotenv
 RUN pip install flask_pymongo
+RUN pip install python-dotenv
 # Expose port
 EXPOSE 5000
 # Run command
