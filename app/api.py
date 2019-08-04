@@ -1,7 +1,6 @@
 from app import app, mongo
 from flask import jsonify
 from flask import request, url_for, redirect
-from flask_pymongo import PyMongo
 from werkzeug.http import HTTP_STATUS_CODES
 from bson.objectid import ObjectId
 
@@ -215,6 +214,44 @@ def get_competition_by_data_feature_fuzzy(data_feature):
         record['_id'] = str(record['_id'])
         data.append(record)
     return jsonify(data)
+
+
+# Fuzzy Search by comp_title, comp_host_name, comp_scenario and data_feature
+@app.route("/api/competition/comp-search/fuzzy/<string:keyword>", methods=['GET'])
+def search_competition_fuzzy_single_keyword(keyword):
+    data = list()
+    search_dict = dict()
+    search_dict['comp_title'] = {'$regex': keyword}
+    search_dict['comp_host_name'] = {'$regex': keyword}
+    search_dict['comp_scenario'] = {'$regex': keyword}
+    search_dict['data_feature'] = {'$regex': keyword}
+
+    # 'and' search
+    for record in mongo.db.Competition.find({'$and': search_dict}):
+        record['_id'] = str(record['_id'])
+        data.append(record)
+
+    # 'or' search (using unique _id to make sure no duplication)
+    for record in mongo.db.Competition.find({'$and': search_dict}):
+        record['_id'] = str(record['_id'])
+        data.append(record)
+
+    data_dedup = list(set(data))
+    data_dedup.sort(key=data.index)
+    return jsonify(data_dedup)
+
+
+# Fuzzy Search in multiple by comp_title, comp_host_name, comp_scenario and data_feature
+# @app.route("/api/competition/comp-search/fuzzy/multi/<string:keywords>", methods=['GET'])
+# def search_competition_fuzzy_multi_keywords(keywords):
+#     # keywords split by space
+#     data = list()
+#     search_dict = dict()
+#     # split the string which include multiple keyword
+#     key_words = keywords.split(' ').remove('')
+#     print(key_words)
+
+
 
 
 # bad requests holder

@@ -17,8 +17,8 @@ if __name__ == '__main__':
         "update_time": "2019-08-01",
         "deadline": "2019-10-31 23:59:59",
         "timezone": "UTC",
-        "comp_scenario": ["CV", "SP"],
-        "data_feature": ["一维数组"],
+        "comp_scenario": "CV",
+        "data_feature": "一维数组",
         "contributor_id": "233"
     }
 

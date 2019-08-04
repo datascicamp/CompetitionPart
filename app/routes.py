@@ -2,7 +2,7 @@ from app import app
 from flask import jsonify
 
 
-@app.route('/usage')
+@app.route('/api/usage')
 def usage():
     usage = [
         {'api_format': '/users/uid/<int:uid>', 'method': 'GET', 'description': 'Get user info by uid'},
