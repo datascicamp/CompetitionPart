@@ -32,3 +32,4 @@ def usage():
 
     return render_template('frontPage.html', usage_infos=usages)
 
+
