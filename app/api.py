@@ -3,7 +3,7 @@ from flask import jsonify
 from flask import request, url_for, redirect
 from werkzeug.http import HTTP_STATUS_CODES
 from bson.objectid import ObjectId
-from func_pack import create_rec_hash
+from func_pack import create_rec_hash, str_to_right_type
 
 
 # Get all competition infos
@@ -87,6 +87,13 @@ def get_competition_by__id(rid):
 # Insert new competition infos
 @app.route("/api/competition", methods=['POST'])
 def insert_new_competition():
+    # Revert list-like string to list
+    comp_scenario_list = str_to_right_type(request.form.get('comp_scenario'))
+    comp_data_feature_list = str_to_right_type(request.form.get('data_feature'))
+
+    # Revert dict-like string to dict
+    comp_host_list = str_to_right_type(request.form.get('comp_host'))
+
     # assemble a dict
     new_competition = dict()
     new_competition['comp_record_hash'] = create_rec_hash()
@@ -95,16 +102,17 @@ def insert_new_competition():
     new_competition['comp_range'] = request.form.get('comp_range')
     new_competition['comp_url'] = request.form.get('comp_url')
     new_competition['comp_description'] = request.form.get('comp_description')
-    new_competition['comp_host_name'] = request.form.get('comp_host_name')
-    new_competition['comp_host_url'] = request.form.get('comp_host_url')
+    new_competition['comp_host'] = comp_host_list
     new_competition['prize_amount'] = request.form.get('prize_amount')
     new_competition['prize_currency'] = request.form.get('prize_currency')
     new_competition['publish_time'] = request.form.get('publish_time')
     new_competition['update_time'] = request.form.get('update_time')
     new_competition['deadline'] = request.form.get('deadline')
     new_competition['timezone'] = request.form.get('timezone')
-    new_competition['comp_scenario'] = request.form.get('comp_scenario')
-    new_competition['data_feature'] = request.form.get('data_feature')
+    # for multiple competition scenarios
+    new_competition['comp_scenario'] = comp_scenario_list
+    # for multiple competition data features
+    new_competition['data_feature'] = comp_data_feature_list
     new_competition['contributor_id'] = request.form.get('contributor_id')
 
     oid = mongo.db.Competition.insert_one(new_competition).inserted_id
@@ -133,6 +141,13 @@ def insert_new_competition():
 # Modify an existed competition info
 @app.route("/api/competition/<string:rid>", methods=['PUT'])
 def update_competition(rid):
+    # Revert list-like string to list
+    comp_scenario_list = str_to_right_type(request.form.get('comp_scenario'))
+    comp_data_feature_list = str_to_right_type(request.form.get('data_feature'))
+
+    # Revert dict-like string to dict
+    comp_host_list = str_to_right_type(request.form.get('comp_host'))
+
     # assemble a dict
     mod_competition = dict()
     mod_competition['comp_record_hash'] = request.form.get('comp_record_hash')
@@ -141,16 +156,15 @@ def update_competition(rid):
     mod_competition['comp_range'] = request.form.get('comp_range')
     mod_competition['comp_url'] = request.form.get('comp_url')
     mod_competition['comp_description'] = request.form.get('comp_description')
-    mod_competition['comp_host_name'] = request.form.get('comp_host_name')
-    mod_competition['comp_host_url'] = request.form.get('comp_host_url')
+    mod_competition['comp_host'] = comp_host_list
     mod_competition['prize_amount'] = request.form.get('prize_amount')
     mod_competition['prize_currency'] = request.form.get('prize_currency')
     mod_competition['publish_time'] = request.form.get('publish_time')
     mod_competition['update_time'] = request.form.get('update_time')
     mod_competition['deadline'] = request.form.get('deadline')
     mod_competition['timezone'] = request.form.get('timezone')
-    mod_competition['comp_scenario'] = request.form.get('comp_scenario')
-    mod_competition['data_feature'] = request.form.get('data_feature')
+    mod_competition['comp_scenario'] = comp_scenario_list
+    mod_competition['data_feature'] = comp_data_feature_list
     mod_competition['contributor_id'] = request.form.get('contributor_id')
 
     # pymongo update dict structure
@@ -191,7 +205,7 @@ def get_competition_by_comp_name_fuzzy(competition_name):
 def get_competition_by_comp_host_name_fuzzy(hostname):
     data = list()
     # maybe the hostname in different items are same
-    for record in mongo.db.Competition.find({"comp_host_name": {'$regex': hostname}}):
+    for record in mongo.db.Competition.find({"comp_host.comp_host_name": {'$regex': hostname}}):
         record['_id'] = str(record['_id'])
         data.append(record)
     return jsonify(data)
@@ -225,7 +239,7 @@ def search_competition_fuzzy_single_keyword(keyword):
     data = list()
     search_list = list()
     search_list.append({'comp_title': {'$regex': keyword}})
-    search_list.append({'comp_host_name': {'$regex': keyword}})
+    search_list.append({'comp_host.comp_host_name': {'$regex': keyword}})
     search_list.append({'comp_scenario': {'$regex': keyword}})
     search_list.append({'data_feature': {'$regex': keyword}})
 

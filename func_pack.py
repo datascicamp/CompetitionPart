@@ -1,5 +1,6 @@
 import random
 import datetime
+import ast
 
 
 # 随机生成唯一编码
@@ -22,4 +23,9 @@ def create_random_hash():
 # 生成记录唯一编码
 def create_rec_hash():
     return "rec" + create_random_hash()
+
+
+# Revert list-like string to list
+def str_to_right_type(string):
+    return ast.literal_eval(str(string))
 
