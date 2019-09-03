@@ -16,6 +16,17 @@ def get_all_competitions():
     return jsonify(data)
 
 
+# Get competitions info by its comp_record_hash
+@app.route("/api/competition/competition-record-hash/<string:comp_record_hash>", methods=['GET'])
+def get_competition_by_comp_record_hash(comp_record_hash):
+    data = list()
+    # maybe the competition_name in different items are same
+    for record in mongo.db.Competition.find({"comp_record_hash": comp_record_hash}):
+        record['_id'] = str(record['_id'])
+        data.append(record)
+    return jsonify(data)
+
+
 # Get competitions info by its name
 @app.route("/api/competition/competition-name/<string:competition_name>", methods=['GET'])
 def get_competition_by_comp_name(competition_name):

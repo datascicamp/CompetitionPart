@@ -7,7 +7,9 @@ from flask import jsonify, render_template
 def usage():
     usages = [
         {'api_format': '/api/competition/all-competitions', 'method': 'GET',
-         'description': 'Get all competition infos'},
+         'description': 'Get all competition info'},
+        {'api_format': '/api/competition/competition-record-hash/<string:comp_record_hash>', 'method': 'GET',
+         'description': 'Get competitions info by its comp_record_hash'},
         {'api_format': '/api/competition/competition-name/<string:competition_name>', 'method': 'GET',
          'description': 'Get competitions info by its competition name'},
         {'api_format': '/api/competition/contributor-id/<string:contributor_id>', 'method': 'GET',
@@ -21,7 +23,7 @@ def usage():
         {'api_format': '/api/competition/rid/<string:rid>', 'method': 'GET',
          'description': 'Get one competition info by its _id'},
         {'api_format': '/api/competition', 'method': 'POST',
-         'description': 'Insert new competition infos'},
+         'description': 'Insert new competition info'},
         {'api_format': '/api/competition/<string:rid>', 'method': 'PUT',
          'description': 'Modify an existed competition info'},
         {'api_format': '/api/competition/<string:rid>', 'method': 'DELETE',
