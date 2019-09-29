@@ -21,7 +21,7 @@ if __name__ == '__main__':
         "contributor_id": "233"
     }
 
-    result = requests.post("http://127.0.0.1:4997/api/competition",
+    result = requests.post("http://service.datascicamp.com:30081/api/competition",
                            data=record)
 
     print(result)

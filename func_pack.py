@@ -8,7 +8,7 @@ def create_random_hash():
     nowtime = datetime.datetime.now().strftime("%Y%m%d%H%M%S")
     hash_code = hash(nowtime)
     # 绝对值处理
-    if hash_code < 0 :
+    if hash_code < 0:
         hash_code = str(abs(hash_code))
     else:
         hash_code = str(hash_code)

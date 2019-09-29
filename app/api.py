@@ -125,6 +125,7 @@ def insert_new_competition():
     # for multiple competition data features
     new_competition['data_feature'] = comp_data_feature_list
     new_competition['contributor_id'] = request.form.get('contributor_id')
+    new_competition['contributor_name'] = request.form.get('contributor_name')
 
     oid = mongo.db.Competition.insert_one(new_competition).inserted_id
     rid = str(oid)
@@ -177,6 +178,7 @@ def update_competition(rid):
     mod_competition['comp_scenario'] = comp_scenario_list
     mod_competition['data_feature'] = comp_data_feature_list
     mod_competition['contributor_id'] = request.form.get('contributor_id')
+    mod_competition['contributor_name'] = request.form.get('contributor_name')
 
     # pymongo update dict structure
     set_dict = {"$set": mod_competition}
@@ -217,6 +219,7 @@ def update_competition_by_record_hash(comp_record_hash):
     mod_competition['comp_scenario'] = comp_scenario_list
     mod_competition['data_feature'] = comp_data_feature_list
     mod_competition['contributor_id'] = request.form.get('contributor_id')
+    mod_competition['contributor_name'] = request.form.get('contributor_name')
 
     # pymongo update dict structure
     set_dict = {"$set": mod_competition}
